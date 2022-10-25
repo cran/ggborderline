@@ -5,44 +5,69 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/wurli/ggborderline/workflows/R-CMD-check/badge.svg)](https://github.com/wurli/ggborderline/actions)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/ggborderline)](https://CRAN.R-project.org/package=ggborderline)
 <!-- badges: end -->
 
 {ggborderline} provides a set of geoms to make line plots a little bit
 nicer. Use this package along with
 [ggplot2](https://ggplot2.tidyverse.org/) to:
 
--   Improve the clarity of line plots with many overlapping lines
--   Draw more realistic worms
+- Improve the clarity of line plots with many overlapping lines
+- Draw more realistic worms
 
 ## Usage
 
-Simply changing `ggplot2::geom_line()` for `geom_borderline()` can make
-a big difference:
+You can use ggborderline by swapping out {ggplot2} line geoms with their
+‘`border`’ equivalents. For example, here is the effect of swapping
+`ggplot2::geom_line()` for `geom_borderline()`. Notice the white outline
+of lines in the first plot where different lines intersect:
 
 ``` r
 library(ggborderline)
 library(ggplot2)
 library(dplyr, warn.conflicts = FALSE)
-library(patchwork)
 
-plot <- economics_long %>% 
-  group_by(year = lubridate::year(date), variable) %>% 
-  summarise(yearly_total = sum(value01), .groups = "drop") %>% 
-  filter(year %in% 1970:2010) %>% 
-  ggplot(aes(year, yearly_total, colour = variable)) +
+p <- txhousing |>
+  filter(
+    city %in% c("Houston", "Midland", "Beaumont", "Laredo"),
+    !is.na(median)
+  ) |>
+  ggplot(aes(date, median, colour = city)) +
+  scale_y_continuous(labels = scales::label_dollar()) +
+  scale_colour_brewer(palette = "Paired") +
   theme(legend.position = "bottom")
 
-plot + geom_borderline() + ggtitle("Using `geom_borderline()`")
-plot + geom_line() + ggtitle("Using `geom_line()`")
+p + geom_borderline(linewidth = 1) + ggtitle("Using `geom_borderline()`")
+p + geom_line(linewidth = 1) + ggtitle("Using `geom_line()`")
 ```
 
 <img src="man/figures/README-example-1.png" width="50%" /><img src="man/figures/README-example-2.png" width="50%" />
+
+This effect is best applied conservatively, hence the ‘default’ settings
+will only make a subtle (but hopefully positive) difference to existing
+plots. However you can still adjust the `borderwidth` and `bordercolour`
+aesthetics. Notice that the border is also much more noticable in the
+legend too:
+
+``` r
+library(ggdark)
+
+p + 
+  geom_borderline(
+    aes(bordercolour = after_scale(invert_colour(colour))),
+    borderwidth = 1, linewidth = 2
+  )
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
 <details>
 <summary>
 Click here for more uses
 </summary>
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 [Worm code](https://github.com/wurli/ggborderline/blob/main/README.Rmd)
 
@@ -50,7 +75,13 @@ Click here for more uses
 
 # Installation
 
-You can install the development version of ggborderline from
+You can install the released version of ggborderline from CRAN with:
+
+``` r
+install.packages("ggborderline")
+```
+
+The development version of ggborderline can be installed from
 [github](https://github.com/wurli/ggborderline) with:
 
 ``` r
@@ -66,8 +97,8 @@ soured me to lines without borders:
 <p lang="en" dir="ltr">
 I designed my first double-page
 <a href="https://twitter.com/hashtag/dataviz?src=hash&amp;ref_src=twsrc%5Etfw">\#dataviz</a>
-for The Economist!<br><br>It depicts our new ‘Normalcy index’, which
-tracks the world's return to pre-pandemic life &gt;&gt;
+for The Economist!<br><br>It depicts our new 'Normalcy index', which
+tracks the world's return to pre-pandemic life \>\>
 <a href="https://www.economist.com/graphic-detail/2021/07/03/our-normalcy-index-shows-life-is-halfway-back-to-pre-covid-norms">https://www.economist.com/graphic-detail/2021/07/03/our-normalcy-index-shows-life-is-halfway-back-to-pre-covid-norms</a>
 <a href="https://twitter.com/_rospearce/status/1410903833442717698/photo/1">pic.twitter.com/1sIUMoZco1</a>
 </p>
@@ -95,4 +126,4 @@ This package would not have been possible without the fantastic
 [ggplot2](https://ggplot2.tidyverse.org/) package, and would have been
 very difficult without the [accompanying
 book](https://ggplot2-book.org/). My humble and sincere thanks go to all
-the authors who make projects like this possible.
+the authors and developers who make projects like this possible.
